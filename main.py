@@ -2,18 +2,25 @@ import pygame
 import sys
 import traceback
 from pygame.locals import *
+from random import *
 import myplane
 import enemy
-
+import bullet
 
 pygame.init()
 pygame.mixer.init()
 
-bg_size = width, height = 480, 700
+bg_size = width, height = 480,700
 screen = pygame.display.set_mode(bg_size)
-pygame.display.set_caption('AirFightDemo')
+pygame.display.set_caption('Aircraft_War_Demo')
 
 background = pygame.image.load('images/background.png').convert()
+
+# Define Colors
+BLACK = (0,0,0)
+GREEN = (0,255,0)
+RED = (255,0,0)
+
 
 # load game music
 pygame.mixer.music.load('sound/game_music.wav')
@@ -38,62 +45,63 @@ enemy2_down_sound = pygame.mixer.Sound('sound/enemy2_down.wav')
 enemy2_down_sound.set_volume(0.2)
 enemy3_down_sound = pygame.mixer.Sound('sound/enemy3_down.wav')
 enemy3_down_sound.set_volume(0.5)
+hero_down_sound = pygame.mixer.Sound('sound/hero_down.wav')
+hero_down_sound.set_volume(0.2)
 
-
-
-
-
-
-def add_small_enemies(group1, group2, num):
+def add_small_enemies(group1,group2,num):
 	for i in range(num):
 		e1 = enemy.SmallEnemy(bg_size)
 		group1.add(e1)
 		group2.add(e1)
 
-def add_mid_enemies(group1, group2, num):
+def add_mid_enemies(group1,group2,num):
 	for i in range(num):
 		e2 = enemy.MidEnemy(bg_size)
 		group1.add(e2)
 		group2.add(e2)
 
-def add_big_enemies(group1, group2, num):
+def add_big_enemies(group1,group2,num):
 	for i in range(num):
 		e3 = enemy.BigEnemy(bg_size)
 		group1.add(e3)
 		group2.add(e3)
 
 
-def main(): 
+
+def main():
 	pygame.mixer.music.play(-1)
 
-	# 生成我方飞机
-	hero = myplane.Myplane(bg_size)
-
-	# 生成敌方飞机
+	# Define myPlane
+	hero = myplane.MyPlane(bg_size)
+	# Define enemyPlanes
 	enemies = pygame.sprite.Group()
-	# 生成小飞机
 	small_enemies = pygame.sprite.Group()
 	add_small_enemies(small_enemies, enemies, 15)
-	# 生成中飞机
 	mid_enemies = pygame.sprite.Group()
 	add_mid_enemies(mid_enemies, enemies, 4)
-	# 生成大飞机
 	big_enemies = pygame.sprite.Group()
-	add_big_enemies(big_enemies, enemies, 4)
+	add_big_enemies(big_enemies, enemies, 2)
 
 	clock = pygame.time.Clock()
 
-	# 中弹图片索引
+	# Define bullet
+	bullet1 = []
+	bullet1_index = 0
+	bullet1_num = 5
+	for i in range(bullet1_num):
+		bullet1.append(bullet.Bullet1(hero.rect.midtop))
+
+
+	# Plane destroy images index
 	e1_destroy_index = 0
 	e2_destroy_index = 0
 	e3_destroy_index = 0
 	hero_destroy_index = 0
 
-
-	# 用于切换图片
+	# myPlan switch between images
 	switch_image = True
 
-	# 用于延迟
+	# image switch delay
 	delay = 100
 
 	running = True
@@ -104,8 +112,7 @@ def main():
 				pygame.quit()
 				sys.exit()
 
-
-		# 检测用户的键盘操作
+		# Detect trace of the mouse.
 		key_pressed = pygame.key.get_pressed()
 
 		if key_pressed[K_w] or key_pressed[K_UP]:
@@ -117,107 +124,159 @@ def main():
 		if key_pressed[K_d] or key_pressed[K_RIGHT]:
 			hero.moveRight()
 
-
 		screen.blit(background, (0, 0))
 
-		# generate big enemies
+		# Bullet fire
+		if not(delay % 10):
+			bullet1[bullet1_index].reset(hero.rect.midtop)
+			bullet1_index = (bullet1_index + 1) % bullet1_num
+
+		# Bullet collide detection
+		for b in bullet1:
+			if b.active:
+				b.move()
+				screen.blit(b.image, b.rect)
+				enemy_hit = pygame.sprite.spritecollide(\
+					b, enemies, False, pygame.sprite.collide_mask)
+				if enemy_hit:
+					b.active = False
+					for e in enemy_hit:
+						if e in mid_enemies or e in big_enemies:
+							e.hit = True
+							e.energy -= 1
+							if e.energy == 0:
+								e.active = False
+						else:
+							e.active = False
+
+
+
+
+		# Generate enemyPlanes
+		# Big enemies
 		for each in big_enemies:
-			# if the big enemy is active:
 			if each.active:
 				each.move()
-				# show the two images of the big enemy
-				if switch_image:
+				if each.hit:
+					# Show hit special effect
+					screen.blit(each.image_hit, each.rect)
+					each.hit = False
+				elif switch_image:
 					screen.blit(each.image1, each.rect)
 				else:
 					screen.blit(each.image2, each.rect)
-				# play the sound of the big enemy
-				if each.rect.bottom > -50:
+
+				# Showing energy remained
+				pygame.draw.line(screen, BLACK, \
+								(each.rect.left, each.rect.top - 5), \
+								(each.rect.right, each.rect.top -5), 2,\
+								)
+
+				# Show GREEN when enemy energy is grater than 20%, else show red
+				energy_remained = each.energy / enemy.BigEnemy.energy
+				if energy_remained > 0.2:
+					energy_color = GREEN
+				else:
+					energy_color = RED
+				pygame.draw.line(screen, energy_color, \
+								(each.rect.left, each.rect.top - 5), \
+								(each.rect.left + each.rect.width * energy_remained, \
+								each.rect.top - 5), 2)
+
+				# Play special BGM when big enemy is showing up
+				if each.rect.bottom == -50:
 					enemy3_fly_sound.play(-1)
-			# if the big enemy is destroyed		
 			else:
+				# Destroy big enemies
 				if not(delay % 3):
-					# play the destroyed sound of the big enemy
 					if e3_destroy_index == 0:
 						enemy3_down_sound.play()
-					# show the six destroyed images of the big enemy
 					screen.blit(each.destroy_images[e3_destroy_index], each.rect)
-					e3_destroy_index = (e3_destroy_index + 1) % 6 # the index number can only be 1,2,3,4,5,0
+					e3_destroy_index = (e3_destroy_index + 1) % 6
 					if e3_destroy_index == 0:
-						# hero_down_sound.stop()
+						enemy3_fly_sound.stop()
 						each.reset()
 
 
-		# generate mid enemies
+		# Mid enemies
 		for each in mid_enemies:
-			# if the mid enemy is active:			
 			if each.active:
 				each.move()
-				# show the image of the mid enemy
-				screen.blit(each.image, each.rect)
-			# if the mid enemy is destroyed:			
+				if each.hit:
+					screen.blit(each.image_hit, each.rect)
+					each.hit = False
+				else:
+					screen.blit(each.image, each.rect)
+
+				# Showing energy remained
+				pygame.draw.line(screen, BLACK, \
+								(each.rect.left, each.rect.top - 5), \
+								(each.rect.right, each.rect.top -5), 2,\
+								)
+
+				# Show GREEN when enemy energy is grater than 20%, else show red
+				energy_remained = each.energy / enemy.MidEnemy.energy
+				if energy_remained > 0.2:
+					energy_color = GREEN
+				else:
+					energy_color = RED
+				pygame.draw.line(screen, energy_color, \
+								(each.rect.left, each.rect.top - 5), \
+								(each.rect.left + each.rect.width * energy_remained, \
+								each.rect.top - 5), 2)
+
 			else:
+				# Destroy mid enemies
 				if not(delay % 3):
-					# play the destroyed sound of the mid enemy
 					if e2_destroy_index == 0:
 						enemy2_down_sound.play()
-					# show the four destroyed images of the mid enemy
 					screen.blit(each.destroy_images[e2_destroy_index], each.rect)
-					e2_destroy_index = (e2_destroy_index + 1) % 4 # the index number can only be 1,2,3,0
+					e2_destroy_index = (e2_destroy_index + 1) % 4
 					if e2_destroy_index == 0:
 						each.reset()
 
-
-
-		# generate small enemies
+		# Small enemies
 		for each in small_enemies:
-			# if the small enemy is active:
 			if each.active:
 				each.move()
-				# show the image of the small enemy
 				screen.blit(each.image, each.rect)
-			# if the small enemy is destroyed
 			else:
+				# Destroy small enemies
 				if not(delay % 3):
 					if e1_destroy_index == 0:
-					# play the destroyed sound of the small enemy
 						enemy1_down_sound.play()
-					# show the four destroyed images of the small enemy
 					screen.blit(each.destroy_images[e1_destroy_index], each.rect)
-					e1_destroy_index = (e1_destroy_index + 1) % 4 # the index number can only be 1,2,3,0
+					e1_destroy_index = (e1_destroy_index + 1) % 4
 					if e1_destroy_index == 0:
 						each.reset()
 
-		# 检测我方飞机是否被撞
+
+		# Collide detection
 		enemies_down = pygame.sprite.spritecollide(hero, enemies, False, pygame.sprite.collide_mask)
 		if enemies_down:
 			hero.active = False
 			for e in enemies_down:
 				e.active = False
 
-	
-
-		# generate my hero plane
-		switch_image = not switch_image
-		# if the hero plane is active:
+		# Generate myPlane
 		if hero.active:
 			if switch_image:
 				screen.blit(hero.image1, hero.rect)
 			else:
 				screen.blit(hero.image2, hero.rect)
-		# if the hero plane is destroyed
 		else:
-			# show the four destroyed images of the hero plane
+			# Destroy hero plane
 			if not(delay % 3):
-				screen.blit(each.destroy_images[hero_destroy_index], hero.rect)
-				hero_destroy_index = (hero_destroy_index + 1) % 4 # the index number can only be 1,2,3,0
 				if hero_destroy_index == 0:
-					# hero.reset()
-					print('GAME OVER!')
+					hero_down_sound.play()
+				screen.blit(hero.destroy_images[hero_destroy_index], hero.rect)
+				hero_destroy_index = (hero_destroy_index + 1) % 4
+				if hero_destroy_index == 0:
+					# each.reset()
+					print('Game Over!')
 					running = False
 
-
-
-		# 切换图片
+		# Switch between images with delay
 		if not(delay % 5):
 			switch_image = not switch_image
 
@@ -225,11 +284,9 @@ def main():
 		if not delay:
 			delay = 100
 
-
 		pygame.display.flip()
 
 		clock.tick(60)
-
 
 if __name__ == '__main__':
 	try:
