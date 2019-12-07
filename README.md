@@ -63,3 +63,12 @@ Bomb
 5. As the game continues, the hardness of the game will increase. There are total of 5 levels of hardness, and the players can updrade the hardness through achieve certain scores(5000, 50000, 500000, 1000000). As the level of hardness upgraded, the number of enemy planes and their speeds will increase.
 6. Our plane will be given three lives in the beginning of each game. The lives will be affected by the time our plane colliding with enemy planes. Once there is a collision between our plane and enemy planes, both planes will be destroyed. If our plane has life remaining, it will resurrect at the bottom middle of the screen with three seconds of safe time.
 7. The game will record the histrical highest score. After game is over, players can choose to restart or end the game.
+
+**Reference**
+-----
+1. https://fishc.com.cn/forum.php?mod=forumdisplay&fid=243&filter=typeid&typeid=398 (It's a chinese forum website for Python new learner.)
+2. https://github.com/happyte/plane (It's a github page with an example of AircraftWar game.)
+3. https://github.com/Markbolo/AircraftWar(Another example of AircraftWar game.)
+4. https://www.pygame.org/docs/ (The official documents of Pygame package)
+
+
