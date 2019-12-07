@@ -1,3 +1,8 @@
+'''
+This main.py is the code to run the AircraftWar Game!
+
+The images, game music and font are accessible via https://fishc.com.cn/
+'''
 import pygame
 import sys
 import traceback
@@ -8,12 +13,14 @@ import enemy
 import bullet
 import supply
 
+# We use pygame package to achieve most of the game function.
+# So here we need to init the parameter.
 pygame.init()
 pygame.mixer.init()
-
+# bg_size is the background size of the game
 bg_size = width, height = 480, 700
 screen = pygame.display.set_mode(bg_size)
-pygame.display.set_caption('Aircraft_War_Demo')
+pygame.display.set_caption('Aircraft_War')
 
 background = pygame.image.load('images/background.png').convert()
 
@@ -22,7 +29,6 @@ BLACK = (0,0,0)
 GREEN = (0,255,0)
 RED = (255,0,0)
 WHITE = (255,255,255)
-
 
 # load game music
 pygame.mixer.music.load('sound/game_music.wav')
@@ -74,11 +80,25 @@ def increase_speed(target,inc):
 
 
 def main():
+	'''
+	This main function is to run the game.
+
+	The main function can be divide into two parts. 
+	
+	In the first part, we defines all the necessary parameters, states(True or False) and index.
+	
+	In the second part, we use the classes, functions from main.py file and other imported py file to run the game.
+	'''
+
+
+	# THE FIRST PART STARTS HERE!
+
+
 	pygame.mixer.music.play(-1)
 
-	# Define myPlane
+	# Define my hero plane class
 	hero = myplane.MyPlane(bg_size)
-	# Define enemyPlanes
+	# Define small, mid and big enemy planes classes
 	enemies = pygame.sprite.Group()
 	small_enemies = pygame.sprite.Group()
 	add_small_enemies(small_enemies, enemies, 15)
@@ -89,14 +109,14 @@ def main():
 
 	clock = pygame.time.Clock()
 
-	# Define bullet
+	# Define bullet1 class
 	bullet1 = []
 	bullet1_index = 0
 	bullet1_num = 5
 	for i in range(bullet1_num):
 		bullet1.append(bullet.Bullet1(hero.rect.midtop))
 
-	# Define super bullet
+	# Define super bullet2 class
 	bullet2 = []
 	bullet2_index = 0
 	bullet2_num = 10
@@ -104,19 +124,17 @@ def main():
 		bullet2.append(bullet.Bullet2((hero.rect.centerx - 32, hero.rect.centery)))
 		bullet2.append(bullet.Bullet2((hero.rect.centerx + 32, hero.rect.centery)))
 
-
-	# Plane destroy images index
+	# Init Plane destroy images index
 	e1_destroy_index = 0
 	e2_destroy_index = 0
 	e3_destroy_index = 0
 	hero_destroy_index = 0
 
-	# Score recording
+	# Init Score recording
 	score = 0
 	score_font = pygame.font.Font('Font/font.ttf', 36)
 
-
-	# Pause the game
+	# Init the pause function
 	paused = False
 	pause_nor_image = pygame.image.load('images/game_pause_nor.png').convert_alpha()
 	pause_pressed_image = pygame.image.load('images/game_pause_pressed.png').convert_alpha()
@@ -127,16 +145,16 @@ def main():
 	paused_rect.top = 10
 	paused_image = pause_nor_image
 
-	# Setting Game Levels
+	# Init Game Levels
 	level = 1
 
-	# Define bomb
+	# Show bomb botton on the game interface
 	bomb_image = pygame.image.load('images/bomb.png').convert_alpha()
 	bomb_rect = bomb_image.get_rect()
 	bomb_font = pygame.font.Font('Font/font.ttf', 48)
 	bomb_num = 3
 
-	# Define supply
+	# Init bullet and bomb supply
 	bullet_supply = supply.BulletSupply(bg_size)
 	bomb_supply = supply.BombSupply(bg_size)
 	supply_time = USEREVENT
@@ -146,37 +164,43 @@ def main():
 	super_bullet_time = USEREVENT + 1
 	is_super_bullet = False
 
-	# Safe timer
+	# Set Safe timer
 	safe_time = USEREVENT + 2
 
-	# hero life
+	# Set hero life
 	life_image = pygame.image.load('images/life.png').convert_alpha()
 	life_rect = life_image.get_rect()
 	life_number = 3
 
-	# Limit f_open
+	# Init score record 
 	recorded = False
-	# Game Over Screen
+	# Init Game Over Screen
 	gameover_font = pygame.font.Font('Font/font.TTF', 48)
 	restart_image = pygame.image.load('images/restart.png').convert_alpha()
 	restart_rect = restart_image.get_rect()
 	end_game_image = pygame.image.load('images/end_game.png').convert_alpha()
 	end_game_rect = end_game_image.get_rect()
 
-	# myPlan switch between images
+	# Init switch between images
 	switch_image = True
 
-	# image switch delay
+	# Set image switch delay
 	delay = 100
 
+	# Set  the game running state
 	running = True
+
+
+	# THE SECOND PART!
+
 
 	while running:
 		for event in pygame.event.get():
+			# Function: Quit the game 
 			if event.type == QUIT:
 				pygame.quit()
 				sys.exit()
-
+			# Function: Pause or Restart the game. When pausing the game, stop playing all the music. 
 			elif event.type == MOUSEBUTTONDOWN:
 				if event.button == 1 and paused_rect.collidepoint(event.pos):
 					paused = not paused
@@ -188,8 +212,8 @@ def main():
 						pygame.time.set_timer(supply_time, 45 * 1000)
 						pygame.mixer.music.unpause()
 						pygame.mixer.unpause()
-
-
+			# Function: Show the images of the pause botton. When the mouse move to the pause images, 
+			# it will switch another images with deeper color to indicate the gameplayer to press the button.
 			elif event.type == MOUSEMOTION:
 				if paused_rect.collidepoint(event.pos):
 					if paused:
@@ -201,6 +225,7 @@ def main():
 						paused_image = resume_nor_image
 					else:
 						paused_image = pause_nor_image
+			# Function: Use the bomb when the gameplayer presses the space key.
 			elif event.type == KEYDOWN:
 				if event.key == K_SPACE:
 					if bomb_num:
@@ -209,19 +234,22 @@ def main():
 						for each in enemies:
 							if each.rect.bottom > 0:
 								each.active = False
+			# Function: drop the supply every supply_time(5s).
+			# The supply can be bomb or super bullet.
 			elif event.type == supply_time:
 				supply_sound.play()
 				if choice([True, False]):
 					bomb_supply.reset()
 				else:
 					bullet_supply.reset()
+			# Function: set the super bullet time
 			elif event.type == super_bullet_time:
 				is_super_bullet = False
 				pygame.time.set_timer(super_bullet_time, 0)
+			# Function: set the hero safe time
 			elif event.type == safe_time:
 				hero.safe = False
 				pygame.time.set_timer(safe_time, 0)
-
 
 		# Enemy level upgrade with score
 		if level == 1 and score in range(5000, 50000):
@@ -254,12 +282,12 @@ def main():
 			increase_speed(small_enemies, 1)
 			increase_speed(mid_enemies, 1)
 
-
-
+		# Put background on the game interface
 		screen.blit(background, (0, 0))
 
+		# Run the game when not pausing the game and hero plane still alive.
 		if not paused and life_number:
-			# Detect trace of the mouse.
+			# Detect trace of the keyboard.
 			key_pressed = pygame.key.get_pressed()
 
 			if key_pressed[K_w] or key_pressed[K_UP]:
@@ -271,7 +299,7 @@ def main():
 			if key_pressed[K_d] or key_pressed[K_RIGHT]:
 				hero.moveRight()
 
-			# Show bomb supply
+			# Show bomb supply on the game interface
 			if bomb_supply.active:
 				bomb_supply.move()
 				screen.blit(bomb_supply.image, bomb_supply.rect)
@@ -281,7 +309,7 @@ def main():
 						bomb_num += 1
 					bomb_supply.active = False
 
-			# Show bullet supply
+			# Show bullet supply on the game interface
 			if bullet_supply.active:
 				bullet_supply.move()
 				screen.blit(bullet_supply.image, bullet_supply.rect)
@@ -292,7 +320,7 @@ def main():
 					pygame.time.set_timer(super_bullet_time, 20 * 1000)
 					bullet_supply.active = False
 
-			# Bullet fire
+			# Judge whether the hero plane is using bullet1 or bullet2
 			if not(delay % 10):
 				bullet_sound.play()
 				if is_super_bullet:
@@ -305,16 +333,18 @@ def main():
 					bullets[bullet1_index].reset(hero.rect.midtop)
 					bullet1_index = (bullet1_index + 1) % bullet1_num
 
-			# Bullet collide detection
+			# Show the hero plane's bullet on the game interface
 			for b in bullets:
 				if b.active:
 					b.move()
 					screen.blit(b.image, b.rect)
+					# Bullet collide detection
 					enemy_hit = pygame.sprite.spritecollide(\
 						b, enemies, False, pygame.sprite.collide_mask)
 					if enemy_hit:
 						b.active = False
 						for e in enemy_hit:
+							# for mid and big enemies, hero plane needs more bullets to kill them
 							if e in mid_enemies or e in big_enemies:
 								e.hit = True
 								e.energy -= 1
@@ -323,14 +353,13 @@ def main():
 							else:
 								e.active = False
 
-
-			# Generate enemyPlanes
+			# Generate and show enemyPlanes on the game interface
 			# Big enemies
 			for each in big_enemies:
 				if each.active:
 					each.move()
 					if each.hit:
-						# Show hit special effect
+						# Show hit images
 						screen.blit(each.image_hit, each.rect)
 						each.hit = False
 					elif switch_image:
@@ -338,13 +367,13 @@ def main():
 					else:
 						screen.blit(each.image2, each.rect)
 
-					# Showing energy remained
+					# Showing enemy's remained energy
 					pygame.draw.line(screen, BLACK, \
 									(each.rect.left, each.rect.top - 5), \
 									(each.rect.right, each.rect.top -5), 2,\
 									)
 
-					# Show GREEN when enemy energy is grater than 20%, else show red
+					# Show GREEN when enemy energy is greater than 20%, else show RED
 					energy_remained = each.energy / enemy.BigEnemy.energy
 					if energy_remained > 0.2:
 						energy_color = GREEN
@@ -355,14 +384,15 @@ def main():
 									(each.rect.left + each.rect.width * energy_remained, \
 									each.rect.top - 5), 2)
 
-					# Play special BGM when big enemy is showing up
+					# Play special BGM when big enemy showing up
 					if each.rect.bottom == -50:
 						enemy3_fly_sound.play(-1)
 				else:
-					# Destroy big enemies
+					# Destroy big enemy
 					if not(delay % 3):
 						if e3_destroy_index == 0:
 							enemy3_down_sound.play()
+						# Show destroyed images
 						screen.blit(each.destroy_images[e3_destroy_index], each.rect)
 						e3_destroy_index = (e3_destroy_index + 1) % 6
 						if e3_destroy_index == 0:
@@ -370,24 +400,24 @@ def main():
 							score += 10000
 							each.reset()
 
-
 			# Mid enemies
 			for each in mid_enemies:
 				if each.active:
 					each.move()
 					if each.hit:
+						# Show hit images
 						screen.blit(each.image_hit, each.rect)
 						each.hit = False
 					else:
 						screen.blit(each.image, each.rect)
 
-					# Showing energy remained
+					# Showing enemy's remained energy
 					pygame.draw.line(screen, BLACK, \
 									(each.rect.left, each.rect.top - 5), \
 									(each.rect.right, each.rect.top -5), 2,\
 									)
 
-					# Show GREEN when enemy energy is grater than 20%, else show red
+					# Show GREEN when enemy energy is greater than 20%, else show RED
 					energy_remained = each.energy / enemy.MidEnemy.energy
 					if energy_remained > 0.2:
 						energy_color = GREEN
@@ -399,10 +429,11 @@ def main():
 									each.rect.top - 5), 2)
 
 				else:
-					# Destroy mid enemies
+					# Destroy mid enemy
 					if not(delay % 3):
 						if e2_destroy_index == 0:
 							enemy2_down_sound.play()
+						# Show destroyed images
 						screen.blit(each.destroy_images[e2_destroy_index], each.rect)
 						e2_destroy_index = (e2_destroy_index + 1) % 4
 						if e2_destroy_index == 0:
@@ -425,15 +456,14 @@ def main():
 							score += 1000
 							each.reset()
 
-
-			# Collide detection
+			# Collide detection between hero plane and enemy
 			enemies_down = pygame.sprite.spritecollide(hero, enemies, False, pygame.sprite.collide_mask)
 			if enemies_down and not hero.safe:
 				hero.active = False
 				for e in enemies_down:
 					e.active = False
 
-			# Generate myPlane
+			# Generate and show my hero plane on the game interface
 			if hero.active:
 				if switch_image:
 					screen.blit(hero.image1, hero.rect)
@@ -451,13 +481,13 @@ def main():
 						hero.reset()
 						pygame.time.set_timer(safe_time, 3 * 1000)
 
-			# Generate bomb remaining image
+			# Show bomb remaining image on the game interface
 			bomb_text = bomb_font.render('X %d' % bomb_num, True, WHITE)
 			text_rect = bomb_text.get_rect()
 			screen.blit(bomb_image, (10, height - 10 - bomb_rect.height))
 			screen.blit(bomb_text, (20 + bomb_rect.width, height - 5 - text_rect.height))
 
-			# Generate remaining life
+			# Show remaining life of the hero plane on the game interface
 			if life_number:
 			 	for i in range(life_number):
 			 		screen.blit(life_image, (width - 10 - (i+1)* life_rect.width,\
@@ -514,13 +544,11 @@ def main():
 					pygame.quit()
 					sys.exit()
 
-
-		# Generate score on screen
+		# Show score on game screen
 		score_text = score_font.render('Score: %s' % str(score), True, WHITE)
 		screen.blit(score_text, (10, 5))
 
-
-		# Generate pause key
+		# Show pause button
 		screen.blit(paused_image, paused_rect)
 
 		# Switch between images with delay
