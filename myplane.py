@@ -1,3 +1,19 @@
+'''
+This code contains MyPlane class. 
+
+By generate a MyPlane instance(hero plane) in main.py, it can be used to 
+generate a hero plane in the game and the gameplayer can control the hero plane 
+to move up/down/left/right.
+
+**Functions**	
+	__init__:
+		init the self parameters of MyPlane instance
+	moveUp/moveDown/moveLeft/moveRight:
+		control the hero plane to move up/down/left/right.
+	reset:
+		reset the hero plane
+'''
+
 import pygame
 
 class MyPlane(pygame.sprite.Sprite):

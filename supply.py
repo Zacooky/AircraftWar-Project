@@ -1,3 +1,18 @@
+'''
+This code contains BulletSupply and BombSupply classes
+
+By generate BulletSupply/BombSupply instance in main.py, it can be used to 
+generate supplys for the hero plane in the game.
+
+**Functions**
+	__init__:
+		init the self parameters of BulletSupply/BombSupply instance
+	move:
+		control the BulletSupply/BombSupply to keep moving up on the game interface.
+	reset:
+		reset the BulletSupply/BombSupply
+'''
+
 import pygame
 from random import *
 

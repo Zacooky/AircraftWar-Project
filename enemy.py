@@ -1,3 +1,18 @@
+'''
+This code contains three classes: SmallEnemy; MidEnemy; BigEnemy
+
+By generate enemy instance in main.py, it can be used to 
+generate small/mid/big enemy plane in the game.
+
+**Functions**
+	__init__:
+		init the self parameters of small/mid/big enemy plane instance
+	move:
+		control the small/mid/big enemy plane to keep moving down on the game interface.
+	reset:
+		reset the small/mid/big enemy plane
+'''
+
 import pygame
 from random import *
 

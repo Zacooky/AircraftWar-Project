@@ -1,3 +1,18 @@
+'''
+This code contains bullet1/bullet2 classes
+
+By generate bullet instance in main.py, it can be used to 
+generate bullets in the game.
+
+**Functions**
+	__init__:
+		init the self parameters of bullet1/bullet2 instance
+	move:
+		control the bullet1/bullet2 to keep moving up on the game interface.
+	reset:
+		reset the bullet1/bullet2
+'''
+
 import pygame
 
 class Bullet1(pygame.sprite.Sprite):
