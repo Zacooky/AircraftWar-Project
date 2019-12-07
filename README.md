@@ -16,7 +16,7 @@ This code contains the properties of the three kinds of enemies.
 This code contains the properties of two kinds of bullets.
 5. [supply.py](https://github.com/Zacooky/AircraftWar-Project/blob/master/supply.py)
 This code contains the properties of two kinds of suppleis (super bullets and bombs).
-6.[README.md](https://github.com/Zacooky/AircraftWar-Project/blob/master/README.md)
+6. [README.md](https://github.com/Zacooky/AircraftWar-Project/blob/master/README.md)
 This file contains the introduction, installation, instruction of the game and the repository.
 7. [record.txt](https://github.com/Zacooky/AircraftWar-Project/blob/master/record.txt)
 This file stores the highest historical score.
